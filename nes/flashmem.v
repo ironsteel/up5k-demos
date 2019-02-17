@@ -15,7 +15,7 @@ module icosoc_flashmem (
 );
 	reg [7:0] buffer;
 	reg [3:0] xfer_cnt;
-	reg [3:0] state;
+	reg [5:0] state;
 
 	always @(posedge clk) begin
 		ready <= 0;

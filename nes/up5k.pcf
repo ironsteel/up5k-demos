@@ -1,34 +1,69 @@
-set_io clock_16 31
-set_io LED0 12
-set_io LED1 13
+set_io clock_in J3
 
-set_io VGA_HS 46
-set_io VGA_VS 2
-set_io VGA_B[3] 47
-set_io VGA_B[2] 45
-set_io VGA_B[1] 48
-set_io VGA_B[0] 3
-set_io VGA_G[3] 4
-set_io VGA_G[2] 44
-set_io VGA_G[1] 6
-set_io VGA_G[0] 9
-set_io VGA_R[3] 11
-set_io VGA_R[2] 18
-set_io VGA_R[1] 19
-set_io VGA_R[0] 21
+set_io  DAT[0] T8
+set_io  DAT[1] P7
+set_io  DAT[2] N9
+set_io  DAT[3] T9
+set_io  DAT[4] M9
+set_io  DAT[5] R9
+set_io  DAT[6] K9
+set_io  DAT[7] P9
+set_io  DAT[8] R10
+set_io  DAT[9] L10
+set_io DAT[10] P10
+set_io DAT[11] N10
+set_io DAT[12] T10
+set_io DAT[13] T11
+set_io DAT[14] T15
+set_io DAT[15] T14
 
-set_io AUDIO_O 23
-set_io joy_strobe 28
-set_io joy_clock 38
-set_io joy_data 42
+set_io ADR[0] N6
+set_io ADR[1] T1
+set_io ADR[2] P4
+set_io ADR[3] R2
+set_io ADR[4] N5
+set_io ADR[5] T2
+set_io ADR[6] P5
+set_io ADR[7] R3
+set_io ADR[8] R5
+set_io ADR[9] T3
+set_io ADR[10] R4
+set_io ADR[11] M7
+set_io ADR[12] N7
+set_io ADR[13] P6
+set_io ADR[14] M8
+set_io ADR[15] T5
+set_io ADR[16] R6
+set_io ADR[17] P8
 
-set_io flash_sck 15
-set_io flash_csn 16
-set_io flash_mosi 14
-set_io flash_miso 17
+set_io RAMOE L9
+set_io RAMWE T7
+set_io RAMCS T6
 
-set_io buttons[0] 27
-set_io buttons[1] 26
-set_io buttons[2] 25
-set_io buttons[3] 43
-set_io buttons[4] 36
+set_io btn1 K11
+
+set_io VGA_VS H2
+set_io VGA_HS J4
+set_io VGA_R[0] E3
+set_io VGA_R[1] H5
+set_io VGA_R[2] F3
+set_io VGA_G[0] H3
+set_io VGA_G[1] F2
+set_io VGA_G[2] H6
+set_io VGA_B[0] F1
+set_io VGA_B[1] H4
+set_io VGA_B[2] G2
+
+set_io LED0 M12
+set_io LED1 R16
+
+set_io flash_csn R12
+set_io flash_sck R11
+set_io flash_mosi P12
+set_io flash_miso P11
+
+set_io AUDIO_O E2
+
+set_io joy_data   E4
+set_io joy_clock  B2
+set_io joy_strobe F5

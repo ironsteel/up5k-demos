@@ -4,7 +4,7 @@ and cartridge data.
 */
 
 module main_mem(
-  input clock, reset,
+  input clock, clock2x, reset,
   
   input reload,
   input [3:0] index,
@@ -22,7 +22,15 @@ module main_mem(
   output flash_csn,
   output flash_sck,
   output flash_mosi,
-  input flash_miso);
+  input flash_miso,
+
+  // SRAM interface
+  output [17:0] ADR,
+  inout [15:0] DAT,
+  output RAMOE,
+  output RAMWE,
+  output RAMCS
+);
   
 // Compress the 4MB logical address space to our limited available space
 // In the future a more sophisticated memory system will keep games in
@@ -84,7 +92,13 @@ cart_mem cart_i (
   .flash_csn(flash_csn),
   .flash_sck(flash_sck),
   .flash_mosi(flash_mosi),
-  .flash_miso(flash_miso)
+  .flash_miso(flash_miso),
+  // SRAM interface
+  .DAT(DAT),
+  .ADR(ADR),
+  .RAMOE(RAMOE),
+  .RAMWE(RAMWE),
+  .RAMCS(RAMCS)
 );
 
 generic_ram #(

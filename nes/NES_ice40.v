@@ -6,58 +6,58 @@
 
 module NES_ice40 (  
 	// clock input
-  input clock_16,
-  output LED0, LED1,
+  input clock_in,
   
   // VGA
   output         VGA_HS, // VGA H_SYNC
   output         VGA_VS, // VGA V_SYNC
-  output [ 3:0]  VGA_R, // VGA Red[3:0]
-  output [ 3:0]  VGA_G, // VGA Green[3:0]
-  output [ 3:0]  VGA_B, // VGA Blue[3:0]
+  output [ 2:0]  VGA_R, // VGA Red[3:0]
+  output [ 2:0]  VGA_G, // VGA Green[3:0]
+  output [ 2:0]  VGA_B, // VGA Blue[3:0]
                                                                                                     
-
-  // audio
-  output           AUDIO_O,
-  
-  // joystick
-  output joy_strobe, joy_clock,
-  input joy_data,
-  
   // flashmem
   output flash_sck,
   output flash_csn,
   output flash_mosi,
   input flash_miso,
   
-  input [4:0] buttons,
-  
+  // SRAM interface
+  output [17:0] ADR,
+  inout [15:0] DAT,
+  output RAMOE,
+  output RAMWE,
+  output RAMCS,
+
+  input btn1,
+  output LED0,
+  output LED1,
+
+  input joy_data,
+  output joy_strobe,
+  output joy_clock,
+
+  output AUDIO_O
 );
-	wire clock;
 
-wire [4:0] sel_btn;
+  wire clock_out;
+  wire clock;
 
-`ifdef no_io_prim
-assign sel_btn = buttons;
-`else
-//Use SB_IO so we can enable pullup
-(* PULLUP_RESISTOR = "10K" *)
-SB_IO #(
-  .PIN_TYPE(6'b000001),
-  .PULLUP(1'b1)
-) btns [4:0]   (
-  .PACKAGE_PIN(buttons),
-  .D_IN_0(sel_btn)
-);
-`endif
-
-  wire scandoubler_disable;
-
-  wire clock_locked;
-  wire locked_pre;
   always @(posedge clock)
     clock_locked <= locked_pre;
   
+  reg joy_data_sync = 0;
+  reg last_joypad_clock;
+
+  always @(posedge clock) begin
+    if (joy_strobe) begin
+      joy_data_sync <= joy_data;
+    end
+    if (!joy_clock && last_joypad_clock) begin
+      joy_data_sync <= joy_data;
+    end
+    last_joypad_clock <= joy_clock;
+  end
+
   wire [8:0] cycle;
   wire [8:0] scanline;
   wire [15:0] sample;
@@ -71,43 +71,31 @@ SB_IO #(
   wire [7:0] memory_dout;
   
   wire [31:0] mapper_flags;
-  
+
+  reg clock_locked;
+  wire locked_pre;
   pll pll_i (
-  	.clock_in(clock_16),
-  	.clock_out(clock),
-  	.locked(locked_pre)
-  );  
-  
+    .clock_in(clock_in),
+    .clock_out(clock_out),
+    .locked(locked_pre)
+  ); 
+
   assign LED0 = memory_addr[0];
   assign LED1 = !load_done;
   
   wire sys_reset = !clock_locked;
-  reg reload;
-  reg [2:0] last_pressed;
-  reg [3:0] btn_dly;
-  always @ ( posedge clock ) begin
-    //Detect button release and trigger reload
-    btn_dly <= sel_btn[3:0];
-    if (sel_btn[3:0] == 4'b1111 && btn_dly != 4'b1111)
-      reload <= 1'b1;
-    else
-      reload <= 1'b0;
-    // Button 4 is a "shift"
-    if(!sel_btn[0])
-      last_pressed <= {!sel_btn[4], 2'b00};
-    else if(!sel_btn[1])
-      last_pressed <= {!sel_btn[4], 2'b01};
-    else if(!sel_btn[2])
-      last_pressed <= {!sel_btn[4], 2'b10};
-    else if(!sel_btn[3])
-      last_pressed <= {!sel_btn[4], 2'b11};
+
+  reg reload = 0;
+  always @(posedge clock) begin
+	  reload <= !btn1;
   end
   
   main_mem mem (
     .clock(clock),
+    .clock2x(clock_in),
     .reset(sys_reset),
     .reload(reload),
-    .index({1'b0, last_pressed}),
+    .index({4'b0000}),
     .load_done(load_done),
     .flags_out(mapper_flags),
     //NES interface
@@ -123,17 +111,27 @@ SB_IO #(
     .flash_csn(flash_csn),
     .flash_sck(flash_sck),
     .flash_mosi(flash_mosi),
-    .flash_miso(flash_miso)
+    .flash_miso(flash_miso),
+   // SRAM
+   .DAT(DAT),
+   .ADR(ADR),
+   .RAMOE(RAMOE),
+   .RAMWE(RAMWE),
+   .RAMCS(RAMCS)
   );
   
   wire reset_nes = !load_done || sys_reset;
   reg [1:0] nes_ce;
-  wire run_nes = (nes_ce == 3);	// keep running even when reset, so that the reset can actually do its job!
-  
-  wire run_nes_g;
+  wire run_nes = (nes_ce == 3);
+    wire run_nes_g;
   SB_GB ce_buf (
     .USER_SIGNAL_TO_GLOBAL_BUFFER(run_nes),
     .GLOBAL_BUFFER_OUTPUT(run_nes_g)
+  );
+  
+  SB_GB ce_buf1 (
+    .USER_SIGNAL_TO_GLOBAL_BUFFER(clock_out),
+    .GLOBAL_BUFFER_OUTPUT(clock)
   );
   
   // NES is clocked at every 4th cycle.
@@ -146,7 +144,7 @@ SB_IO #(
   NES nes(clock, reset_nes, run_nes_g,
           mapper_flags,
           sample, color,
-          joy_strobe, joy_clock, {3'b0,!joy_data},
+          joy_strobe, joy_clock, {3'b0, !joy_data_sync},
           5'b11111,  // enable all channels
           memory_addr,
           memory_read_cpu, memory_din_cpu,
@@ -156,37 +154,48 @@ SB_IO #(
           dbgadr,
           dbgctr);
 
+  wire [3:0] r;
+  wire [3:0] g;
+  wire [3:0] b;
+
+
+  assign VGA_R[0] = r[3];
+  assign VGA_R[1] = r[2];
+  assign VGA_G[2] = r[1];
+  assign VGA_G[0] = g[3];
+  assign VGA_G[1] = g[2];
+  assign VGA_R[2] = g[1];
+  assign VGA_B[0] = b[3];
+  assign VGA_B[1] = b[2];
+  assign VGA_B[2] = b[1];
 
 video video (
 	.clk(clock),
-		
 	.color(color),
 	.count_v(scanline),
 	.count_h(cycle),
 	.mode(1'b0),
 	.smoothing(1'b1),
-	.scanlines(1'b1),
+	.scanlines(1'b0),
 	.overscan(1'b1),
-	.palette(1'b0),
+	.palette(1'b1),
 	
 	.VGA_HS(VGA_HS),
 	.VGA_VS(VGA_VS),
-	.VGA_R(VGA_R),
-	.VGA_G(VGA_G),
-	.VGA_B(VGA_B)
+	.VGA_R(r),
+	.VGA_G(g),
+	.VGA_B(b)
 	
 );
 
 wire audio;
 assign AUDIO_O = audio;
-/*sigma_delta_dac sigma_delta_dac (
+sigma_delta_dac sigma_delta_dac (
 	.DACout(audio),
 	.DACin(sample[15:8]),
 	.CLK(clock),
 	.RESET(reset_nes),
-  .CEN(run_nes)
-);*/
-
-
+	.CEN(run_nes)
+);
 
 endmodule
