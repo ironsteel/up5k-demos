@@ -47,7 +47,7 @@ module MMC1(input clk, input ce, input reset,
 // CCCCC
 // |||||
 // +++++- Select 4 KB or 8 KB CHR bank at PPU $0000 (low bit ignored in 8 KB mode)
-  reg [4:0] chr_bank_0;
+(* mem2reg *) reg [4:0] chr_bank_0;
 
 // CCCCC
 // |||||
@@ -58,7 +58,7 @@ module MMC1(input clk, input ce, input reset,
 // |||||
 // |++++- Select 16 KB PRG ROM bank (low bit ignored in 32 KB mode)
 // +----- PRG RAM chip enable (0: enabled; 1: disabled; ignored on MMC1A)
-  reg [4:0] prg_bank;
+(* mem2reg *)  reg [4:0] prg_bank;
 
   reg delay_ctrl;	// used to prevent fast-write to the control register
 
@@ -2001,7 +2001,7 @@ module MultiMapper(input clk, input ce, input ppu_ce, input reset,
   Mapper28 map28(clk, ce, reset, flags, prg_ain, map28_prg_addr, prg_read, prg_write, prg_din, map28_prg_allow,
                                         chr_ain, map28_chr_addr, map28_chr_allow, map28_vram_a10, map28_vram_ce);
 
-  /*wire mmc2_prg_allow, mmc2_vram_a10, mmc2_vram_ce, mmc2_chr_allow;
+  wire mmc2_prg_allow, mmc2_vram_a10, mmc2_vram_ce, mmc2_chr_allow;
   wire [21:0] mmc2_prg_addr, mmc2_chr_addr;
   MMC2 mmc2(clk, ppu_ce, reset, flags, prg_ain, mmc2_prg_addr, prg_read, prg_write, prg_din, mmc2_prg_allow,
                                    chr_read, chr_ain, mmc2_chr_addr, mmc2_chr_allow, mmc2_vram_a10, mmc2_vram_ce);
@@ -2011,10 +2011,10 @@ module MultiMapper(input clk, input ce, input ppu_ce, input reset,
   MMC3 mmc3(clk, ppu_ce, reset, flags, prg_ain, mmc3_prg_addr, prg_read, prg_write, prg_din, mmc3_prg_allow,
                                    chr_ain, mmc3_chr_addr, mmc3_chr_allow, mmc3_vram_a10, mmc3_vram_ce, mmc3_irq);
 
-  wire mmc4_prg_allow, mmc4_vram_a10, mmc4_vram_ce, mmc4_chr_allow;
+  /*wire mmc4_prg_allow, mmc4_vram_a10, mmc4_vram_ce, mmc4_chr_allow;
   wire [21:0] mmc4_prg_addr, mmc4_chr_addr;
   MMC4 mmc4(clk, ppu_ce, reset, flags, prg_ain, mmc4_prg_addr, prg_read, prg_write, prg_din, mmc4_prg_allow,
-                                   chr_read, chr_ain, mmc4_chr_addr, mmc4_chr_allow, mmc4_vram_a10, mmc4_vram_ce);
+                                   chr_read, chr_ain, mmc4_chr_addr, mmc4_chr_allow, mmc4_vram_a10, mmc4_vram_ce);*/
 
   wire mmc5_prg_allow, mmc5_vram_a10, mmc5_vram_ce, mmc5_chr_allow, mmc5_irq;
   wire [21:0] mmc5_prg_addr, mmc5_chr_addr;
@@ -2024,7 +2024,7 @@ module MultiMapper(input clk, input ce, input ppu_ce, input reset,
                                    chr_ain, mmc5_chr_addr, mmc5_chr_dout, mmc5_has_chr_dout, 
                                    mmc5_chr_allow, mmc5_vram_a10, mmc5_vram_ce, mmc5_irq);
 
-  wire map13_prg_allow, map13_vram_a10, map13_vram_ce, map13_chr_allow;
+  /*wire map13_prg_allow, map13_vram_a10, map13_vram_ce, map13_chr_allow;
   wire [21:0] map13_prg_addr, map13_chr_addr;
   Mapper13 map13(clk, ce, reset, flags, prg_ain, map13_prg_addr, prg_read, prg_write, prg_din, map13_prg_allow,
                                         chr_ain, map13_chr_addr, map13_chr_allow, map13_vram_a10, map13_vram_ce);
@@ -2170,16 +2170,16 @@ module MultiMapper(input clk, input ce, input ppu_ce, input reset,
 // 234 = Not Tested        
     case(flags[7:0])
     1:  {prg_aout, prg_allow, chr_aout, vram_a10, vram_ce, chr_allow}      = {mmc1_prg_addr, mmc1_prg_allow, mmc1_chr_addr, mmc1_vram_a10, mmc1_vram_ce, mmc1_chr_allow};
-    /*9:  {prg_aout, prg_allow, chr_aout, vram_a10, vram_ce, chr_allow}      = {mmc2_prg_addr, mmc2_prg_allow, mmc2_chr_addr, mmc2_vram_a10, mmc2_vram_ce, mmc2_chr_allow};
+    9:  {prg_aout, prg_allow, chr_aout, vram_a10, vram_ce, chr_allow}      = {mmc2_prg_addr, mmc2_prg_allow, mmc2_chr_addr, mmc2_vram_a10, mmc2_vram_ce, mmc2_chr_allow};
     118, // TxSROM connects A17 to CIRAM A10.
     119, // TQROM  uses the Nintendo MMC3 like other TxROM boards but uses the CHR bank number specially.
     47,  // Mapper 047 is a MMC3 multicart
 	 206, // MMC3 w/o IRQ or WRAM support
     4:  {prg_aout, prg_allow, chr_aout, vram_a10, vram_ce, chr_allow, irq} = {mmc3_prg_addr, mmc3_prg_allow, mmc3_chr_addr, mmc3_vram_a10, mmc3_vram_ce, mmc3_chr_allow, mmc3_irq};
 
-    10: {prg_aout, prg_allow, chr_aout, vram_a10, vram_ce, chr_allow}      = {mmc4_prg_addr, mmc4_prg_allow, mmc4_chr_addr, mmc4_vram_a10, mmc4_vram_ce, mmc4_chr_allow};
+    /*10: {prg_aout, prg_allow, chr_aout, vram_a10, vram_ce, chr_allow}      = {mmc4_prg_addr, mmc4_prg_allow, mmc4_chr_addr, mmc4_vram_a10, mmc4_vram_ce, mmc4_chr_allow};*/
 	 
-    5:  {prg_aout, prg_allow, chr_aout, vram_a10, vram_ce, chr_allow, has_chr_dout, prg_dout, irq} = {mmc5_prg_addr, mmc5_prg_allow, mmc5_chr_addr, mmc5_vram_a10, mmc5_vram_ce, mmc5_chr_allow, mmc5_has_chr_dout, mmc5_prg_dout, mmc5_irq};*/
+    5:  {prg_aout, prg_allow, chr_aout, vram_a10, vram_ce, chr_allow, has_chr_dout, prg_dout, irq} = {mmc5_prg_addr, mmc5_prg_allow, mmc5_chr_addr, mmc5_vram_a10, mmc5_vram_ce, mmc5_chr_allow, mmc5_has_chr_dout, mmc5_prg_dout, mmc5_irq};
 
     0,
     2,

@@ -177,7 +177,7 @@ video video (
 	.mode(1'b0),
 	.smoothing(1'b1),
 	.scanlines(1'b0),
-	.overscan(1'b1),
+	.overscan(1'b0),
 	.palette(1'b1),
 	
 	.VGA_HS(VGA_HS),
@@ -192,7 +192,7 @@ wire audio;
 assign AUDIO_O = audio;
 sigma_delta_dac sigma_delta_dac (
 	.DACout(audio),
-	.DACin(sample[15:8]),
+	.DACin(sample[15:0]),
 	.CLK(clock),
 	.RESET(reset_nes),
 	.CEN(run_nes)

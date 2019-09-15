@@ -12,13 +12,15 @@ with open(sys.argv[1], 'rb') as f:
     header = f.read(16)
     prg_size = header[4] * 16384
     chr_size = header[5] * 8192
-    assert prg_size <= 2 * prg_alloc #PRG can spill into CHR sometimes
+    print(prg_size)
+    print(chr_size)
+    #assert prg_size <= 2 * prg_alloc #PRG can spill into CHR sometimes
     prg_dat = f.read(prg_size)
-    if prg_size > prg_alloc:
-        assert chr_size == 0
-    else:
-        assert chr_size <= chr_alloc
-        chr_dat = f.read(chr_size)
+    chr_dat = f.read(chr_size)
+    #if prg_size > prg_alloc:
+    #    assert chr_size == 0
+    #else:
+    #    assert chr_size <= chr_alloc
 
 prg_dat = bytearray(prg_dat)
 chr_dat = bytearray(chr_dat)
@@ -26,13 +28,16 @@ chr_dat = bytearray(chr_dat)
 for i in range(prg_size, prg_alloc):
     prg_dat.append(prg_dat[i % prg_size])
 if prg_size > prg_alloc:
+    print("SIZE IS BIGGER")
     for i in range(prg_size, 2*prg_alloc):
         prg_dat.append(prg_dat[i % prg_size])
-else:
+
+if chr_size > 0:
     for i in range(chr_size, chr_alloc):
-        if chr_size == 0:
-            chr_dat.append(0)
-        else:
+        chr_dat.append(chr_dat[i % chr_size])
+    if chr_size > chr_alloc:
+        print("chr_size > chr_alloc")
+        for i in range(chr_size, 2*chr_alloc):
             chr_dat.append(chr_dat[i % chr_size])
 
 out_flags = 0x0
@@ -94,5 +99,7 @@ with open(sys.argv[2], 'wb') as f:
     f.write(prg_dat)
     f.write(chr_dat)
     # Append mapper, size and other flags to end of data
+    print(prg_size + chr_size)
+    print(256 * 1024 - (prg_size + chr_size))
+    f.write(bytearray(512*1024 - (len(prg_dat) + len(chr_dat)))) # pad to 256kB total
     f.write(bytes([(out_flags) & 0xFF, (out_flags >> 8) & 0xFF, (out_flags >> 16) & 0xFF, (out_flags >> 24) & 0xFF]))
-    f.write(bytearray(256*1024 - (prg_alloc + chr_alloc + 4))) # pad to 256kB total

@@ -38,7 +38,8 @@ initial $readmemh("nes_palette_unsaturatedv6.txt", pal_unsat_lut);*/
 
 // FCEUX palette
 reg [15:0] pal_fcelut[0:63];
-initial $readmemh("nes_palette_fceux.txt", pal_fcelut);
+//initial $readmemh("nes_palette_fceux.txt", pal_fcelut);
+initial $readmemh("nes_palette_unsaturatedv6.txt", pal_fcelut);
 
 wire [14:0] pixel = pal_fcelut[color][14:0];
  

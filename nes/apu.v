@@ -429,7 +429,7 @@ module DmcChan(input clk, input ce, input reset,
   reg [7:0] SampleBuffer;    // Next value to be loaded into shift reg
   reg HasSampleBuffer;       // Sample buffer is nonempty
   reg HasShiftReg;           // Shift reg is non empty
-  reg [8:0] NewPeriod[0:15];
+  (* mem2reg *) reg [8:0] NewPeriod[0:15];
   reg DmcEnabled;
   reg [1:0] ActivationDelay;
   assign DmaAddr = {1'b1, Address};

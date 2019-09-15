@@ -2060,7 +2060,7 @@ endmodule
 module MicroCodeTable(input clk, input ce, input reset, input [7:0] IR, input [2:0] State, output [37:0] Mout);
   wire [8:0] M;
   MicroCodeTableInner inner(clk, ce, reset, IR, State, M);
-  reg [14:0] A[0:31];
+  (* mem2reg *) reg [14:0] A[0:31];
   reg [18:0] B[0:255];
   initial begin
 A[0] = 15'b_10__0_10101_0xx_01_00; // ['[PC++]', '[PC++]->AL', '[PC++]->?', '[PC++]->T', 'PC+1->PC', '']

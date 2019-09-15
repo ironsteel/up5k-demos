@@ -6,12 +6,12 @@ module sigma_delta_dac(
    input                   RESET
 );
 
-parameter MSBI = 7;
+parameter MSBI = 15;
 
-reg [MSBI+2:0] DeltaAdder;   //Output of Delta Adder
-reg [MSBI+2:0] SigmaAdder;   //Output of Sigma Adder
-reg [MSBI+2:0] SigmaLatch;   //Latches output of Sigma Adder
-reg [MSBI+2:0] DeltaB;      //B input of Delta Adder
+(* mem2reg *) reg [MSBI+2:0] DeltaAdder;   //Output of Delta Adder
+(* mem2reg *) reg [MSBI+2:0] SigmaAdder;   //Output of Sigma Adder
+(* mem2reg *) reg [MSBI+2:0] SigmaLatch;   //Latches output of Sigma Adder
+(* mem2reg *) reg [MSBI+2:0] DeltaB;      //B input of Delta Adder
 
 always @ (*)
    DeltaB = {SigmaLatch[MSBI+2], SigmaLatch[MSBI+2]} << (MSBI+1);
