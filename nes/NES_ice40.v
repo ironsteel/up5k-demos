@@ -6,7 +6,10 @@
 
 module NES_ice40 (  
 	// clock input
-  input clock_16,
+  input clock,
+  input clock2x,
+  input reload,
+  input sys_reset,
   output LED0, LED1,
   
   // VGA
@@ -29,35 +32,23 @@ module NES_ice40 (
   output flash_csn,
   output flash_mosi,
   input flash_miso,
-  
-  input [4:0] buttons,
-  
+  // SRAM interface
+  inout [17:0] ADR,
+  inout [15:0] DAT,
+  output RAMOE,
+  output RAMWE,
+  output RAMCS
 );
-	wire clock;
 
-wire [4:0] sel_btn;
-
-`ifdef no_io_prim
-assign sel_btn = buttons;
-`else
-//Use SB_IO so we can enable pullup
-(* PULLUP_RESISTOR = "10K" *)
-SB_IO #(
-  .PIN_TYPE(6'b000001),
-  .PULLUP(1'b1)
-) btns [4:0]   (
-  .PACKAGE_PIN(buttons),
-  .D_IN_0(sel_btn)
-);
-`endif
 
   wire scandoubler_disable;
 
-  wire clock_locked;
+  reg clock_locked;
   wire locked_pre;
   always @(posedge clock)
     clock_locked <= locked_pre;
   
+	wire sys_rest = !clock_locked;
   wire [8:0] cycle;
   wire [8:0] scanline;
   wire [15:0] sample;
@@ -72,42 +63,22 @@ SB_IO #(
   
   wire [31:0] mapper_flags;
   
-  pll pll_i (
+  /*pll pll_i (
   	.clock_in(clock_16),
   	.clock_out(clock),
   	.locked(locked_pre)
-  );  
+  );  */
   
   assign LED0 = memory_addr[0];
   assign LED1 = !load_done;
   
-  wire sys_reset = !clock_locked;
-  reg reload;
-  reg [2:0] last_pressed;
-  reg [3:0] btn_dly;
-  always @ ( posedge clock ) begin
-    //Detect button release and trigger reload
-    btn_dly <= sel_btn[3:0];
-    if (sel_btn[3:0] == 4'b1111 && btn_dly != 4'b1111)
-      reload <= 1'b1;
-    else
-      reload <= 1'b0;
-    // Button 4 is a "shift"
-    if(!sel_btn[0])
-      last_pressed <= {!sel_btn[4], 2'b00};
-    else if(!sel_btn[1])
-      last_pressed <= {!sel_btn[4], 2'b01};
-    else if(!sel_btn[2])
-      last_pressed <= {!sel_btn[4], 2'b10};
-    else if(!sel_btn[3])
-      last_pressed <= {!sel_btn[4], 2'b11};
-  end
   
   main_mem mem (
     .clock(clock),
+    .clock2x(clock2x),
     .reset(sys_reset),
     .reload(reload),
-    .index({1'b0, last_pressed}),
+    .index({4'b0000}),
     .load_done(load_done),
     .flags_out(mapper_flags),
     //NES interface
@@ -123,18 +94,19 @@ SB_IO #(
     .flash_csn(flash_csn),
     .flash_sck(flash_sck),
     .flash_mosi(flash_mosi),
-    .flash_miso(flash_miso)
+    .flash_miso(flash_miso),
+   // SRAM
+   .DAT(DAT),
+   .ADR(ADR),
+   .RAMOE(RAMOE),
+   .RAMWE(RAMWE),
+   .RAMCS(RAMCS)
   );
   
   wire reset_nes = !load_done || sys_reset;
-  reg [1:0] nes_ce;
-  wire run_nes = (nes_ce == 3);	// keep running even when reset, so that the reset can actually do its job!
+  reg [1:0] nes_ce = 2'b00;
+  wire run_nes = (nes_ce == 2'b11);	// keep running even when reset, so that the reset can actually do its job!
   
-  wire run_nes_g;
-  SB_GB ce_buf (
-    .USER_SIGNAL_TO_GLOBAL_BUFFER(run_nes),
-    .GLOBAL_BUFFER_OUTPUT(run_nes_g)
-  );
   
   // NES is clocked at every 4th cycle.
   always @(posedge clock)
@@ -143,7 +115,7 @@ SB_IO #(
   wire [31:0] dbgadr;
   wire [1:0] dbgctr;
   
-  NES nes(clock, reset_nes, run_nes_g,
+  NES nes(clock, reset_nes, run_nes,
           mapper_flags,
           sample, color,
           joy_strobe, joy_clock, {3'b0,!joy_data},
