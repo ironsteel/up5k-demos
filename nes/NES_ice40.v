@@ -31,13 +31,7 @@ module NES_ice40 (
   output flash_sck,
   output flash_csn,
   output flash_mosi,
-  input flash_miso,
-  // SRAM interface
-  inout [17:0] ADR,
-  inout [15:0] DAT,
-  output RAMOE,
-  output RAMWE,
-  output RAMCS
+  input flash_miso
 );
 
 
@@ -94,13 +88,7 @@ module NES_ice40 (
     .flash_csn(flash_csn),
     .flash_sck(flash_sck),
     .flash_mosi(flash_mosi),
-    .flash_miso(flash_miso),
-   // SRAM
-   .DAT(DAT),
-   .ADR(ADR),
-   .RAMOE(RAMOE),
-   .RAMWE(RAMWE),
-   .RAMCS(RAMCS)
+    .flash_miso(flash_miso)
   );
   
   wire reset_nes = !load_done || sys_reset;

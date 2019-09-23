@@ -19,88 +19,6 @@ module testbench;
    wire SPI_FLASH_MOSI;
    wire SPI_FLASH_SCLK;
    
-    wire SRAM_A0;
-    wire SRAM_A1;
-    wire SRAM_A2;
-    wire SRAM_A3;
-    wire SRAM_A4;
-    wire SRAM_A5;
-    wire SRAM_A6;
-    wire SRAM_A7;
-    wire SRAM_A8;
-    wire SRAM_A9;
-    wire SRAM_A10;
-    wire SRAM_A11;
-    wire SRAM_A12;
-    wire SRAM_A13;
-    wire SRAM_A14;
-    wire SRAM_A15;
-    wire SRAM_A16;
-    wire SRAM_A17;
-
-    wire SRAM_D0;
-    wire SRAM_D1;
-    wire SRAM_D2;
-    wire SRAM_D3;
-    wire SRAM_D4;
-    wire SRAM_D5;
-    wire SRAM_D6;
-    wire SRAM_D7;
-    wire SRAM_D8;
-    wire SRAM_D9;
-    wire SRAM_D10;
-    wire SRAM_D11;
-    wire SRAM_D12;
-    wire SRAM_D13;
-    wire SRAM_D14;
-    wire SRAM_D15;
-
-    wire SRAM_CE;
-    wire SRAM_OE;
-    wire SRAM_WE;
-
-    sim_sram sram (
-        .SRAM_A0(SRAM_A0),
-        .SRAM_A1(SRAM_A1),
-        .SRAM_A2(SRAM_A2),
-        .SRAM_A3(SRAM_A3),
-        .SRAM_A4(SRAM_A4),
-        .SRAM_A5(SRAM_A5),
-        .SRAM_A6(SRAM_A6),
-        .SRAM_A7(SRAM_A7),
-        .SRAM_A8(SRAM_A8),
-        .SRAM_A9(SRAM_A9),
-        .SRAM_A10(SRAM_A10),
-        .SRAM_A11(SRAM_A11),
-        .SRAM_A12(SRAM_A12),
-        .SRAM_A13(SRAM_A13),
-        .SRAM_A14(SRAM_A14),
-        .SRAM_A15(SRAM_A15),
-        .SRAM_A16(SRAM_A16),
-        .SRAM_A17(SRAM_A17),
-        .SRAM_CE(SRAM_CE),
-        .SRAM_D0(SRAM_D0),
-        .SRAM_D1(SRAM_D1),
-        .SRAM_D10(SRAM_D10),
-        .SRAM_D11(SRAM_D11),
-        .SRAM_D12(SRAM_D12),
-        .SRAM_D13(SRAM_D13),
-        .SRAM_D14(SRAM_D14),
-        .SRAM_D15(SRAM_D15),
-        .SRAM_D2(SRAM_D2),
-        .SRAM_D3(SRAM_D3),
-        .SRAM_D4(SRAM_D4),
-        .SRAM_D5(SRAM_D5),
-        .SRAM_D6(SRAM_D6),
-        .SRAM_D7(SRAM_D7),
-        .SRAM_D8(SRAM_D8),
-        .SRAM_D9(SRAM_D9),
-        .SRAM_OE(SRAM_OE),
-        .SRAM_WE(SRAM_WE),
-	.SRAM_LB(0),
-	.SRAM_UB(0)
-    );
-
  NES_ice40  nes(  
 	  .clock(clk),
 	  .clock2x(clk2),
@@ -110,15 +28,7 @@ module testbench;
 	  .flash_sck(SPI_FLASH_SCLK),
 	  .flash_csn(SPI_FLASH_CS),
 	  .flash_mosi(SPI_FLASH_MOSI),
-	  .flash_miso(SPI_FLASH_MISO),
-	   // SRAM
-	   .ADR({SRAM_A17, SRAM_A16, SRAM_A15, SRAM_A14, SRAM_A13, SRAM_A12, SRAM_A11, SRAM_A10, SRAM_A9, SRAM_A8,
-			SRAM_A7, SRAM_A6, SRAM_A5, SRAM_A4, SRAM_A3, SRAM_A2, SRAM_A1, SRAM_A0}),
-	    .DAT({SRAM_D15, SRAM_D14, SRAM_D13, SRAM_D12, SRAM_D11, SRAM_D10, SRAM_D9, SRAM_D8,
-			SRAM_D7, SRAM_D6, SRAM_D5, SRAM_D4, SRAM_D3, SRAM_D2, SRAM_D1, SRAM_D0}),
-           .RAMOE(SRAM_OE),
-           .RAMWE(SRAM_WE),
-	   .RAMCS(SRAM_CE)
+	  .flash_miso(SPI_FLASH_MISO)
   );
 
     sim_spiflash spiflash (

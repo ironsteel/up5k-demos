@@ -22,14 +22,7 @@ module main_mem(
   output flash_csn,
   output flash_sck,
   output flash_mosi,
-  input flash_miso,
-
-  // SRAM interface
-  inout [17:0] ADR,
-  inout [15:0] DAT,
-  inout RAMOE,
-  inout RAMWE,
-  inout RAMCS
+  input flash_miso
 );
   
 // Compress the 4MB logical address space to our limited available space
@@ -92,13 +85,7 @@ cart_mem cart_i (
   .flash_csn(flash_csn),
   .flash_sck(flash_sck),
   .flash_mosi(flash_mosi),
-  .flash_miso(flash_miso),
-  // SRAM interface
-  .DAT(DAT),
-  .ADR(ADR),
-  .RAMOE(RAMOE),
-  .RAMWE(RAMWE),
-  .RAMCS(RAMCS)
+  .flash_miso(flash_miso)
 );
 
 generic_ram #(
